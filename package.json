@@ -1,0 +1,19 @@
+{
+  "name": "hackerrank",
+  "version": "1.0.0",
+  "description": "",
+  "main": "pal.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node pal.js",
+    "debug": "node --inspect --no-lazy pal.js 'abba'"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "js-longest-repeated-substring": "^1.0.3",
+    "lodash": "^4.17.4",
+    "min-heap": "^0.2.3",
+    "split2": "^2.2.0"
+  }
+}
