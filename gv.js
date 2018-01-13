@@ -23,26 +23,30 @@ let isWordCreatableFrom = (seed_decomposition, actual_word) => {
 }
 
 let process_dictionary = (words_path, seeds) => {
-    let answer_array = []
     let seeds_decomposition = seeds.map((word, index) => {
         return {
             decomposition: decompose_word(word),
             position: index,
-            // creation_indexes: []
+            creation_indexes: []
         }
     })
     let lines = fs.readFileSync(words_path, { encoding: 'utf8' }).split('\r\n')
     lines.forEach((word_from_dictionnary, i) => {
         let word_decomposition = decompose_word(word_from_dictionnary)
         seeds_decomposition.forEach(element => {
-            if (isWordCreatableFrom(element.decomposition, word_decomposition)) {
-                (answer_array[element.position] || (answer_array[element.position] = [])).push(i + 1)
-                // element.creation_indexes.push(i+1) // Index is zero-based whereas we want 1-based index
-            }
+            if (isWordCreatableFrom(element.decomposition, word_decomposition))
+                element.creation_indexes.push(i+1) // Index is zero-based whereas we want 1-based index
         });
     })
-    answer_array.forEach((v) => { process.stdout.write(v.join(' ') + '\n') })
-    // seeds_decomposition.forEach(seed => { process.stdout.write(seed.creation_indexes.join(' ') + "\n") });
+    let writer = fs.createWriteStream('out.txt',{autoClose: true})
+    for (let i = 0; i < seeds_decomposition.length; i++) {
+        const l = (seeds_decomposition[i] || []).length;
+        for (let j = 0; j < l; j++) {
+            const an = seeds_decomposition[i][j];
+            writer.write(an + " ")
+        }
+        writer.write("\n")
+    }
 }
 
 let seeds = fs.readFileSync(file_path, { encoding: 'utf8' }).split('\r\n')
