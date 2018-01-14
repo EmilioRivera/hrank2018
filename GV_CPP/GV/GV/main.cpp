@@ -40,7 +40,7 @@ private:
 
 int main() {
 
-	wifstream inputReader("in_example.txt", ifstream::in);
+	wifstream inputReader("test.txt", ifstream::in);
 	inputReader.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
 	vector<Decomposition*> seeds;
 	// Worst case
@@ -80,6 +80,8 @@ int main() {
 		}
 		++lineIndex;
 	}
+	dictionnaryReader.close();
+
 	/*Decomposition a(L"matrice");
 	Decomposition b(L"rice");
 	if (b.canCreateWord(L"matrice"))
@@ -88,16 +90,23 @@ int main() {
 	if (a.canCreateWord(L"rice"))
 		wcout << "GOOD a can create b" << endl;*/
 
+	wofstream solWriter("out.txt", wofstream::out);
 
 	for (size_t k = 0; k < seedCounter; k++)
 	{
 		for each (int p in answer_array[k])
 		{
+#if DEBUG
 			wcout << p << " ";
+#endif
+			solWriter << p << " ";
 		}
+#if DEBUG
 		wcout << endl;
+#endif
+		solWriter << endl;
 	}
-
+	solWriter.close();
 
 	for (size_t i = 0; i < seedCounter; i++)
 	{
