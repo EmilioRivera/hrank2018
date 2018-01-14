@@ -8,9 +8,22 @@
 #include <vector>
 #include <chrono>
 #include <cstdio>
-#define DEBUG 0
+#include <algorithm>
+#include <bitset>
+
+#define DEBUG 1
 
 using namespace std;
+
+std::wstring s2ws(const std::string& t_str)
+{
+	//setup converter
+	typedef std::codecvt_utf8<wchar_t> convert_type;
+	std::wstring_convert<convert_type, wchar_t> converter;
+
+	//use converter (.to_bytes: wstr->str, .from_bytes: str->wstr)
+	return converter.from_bytes(t_str);
+}
 
 class WordDecomposition {
 public:
@@ -19,6 +32,7 @@ public:
 			// Non existant values are ok since they will take the default value of int (0)
 			decomposition[(int)chainOfLetters[i]]++;
 		}
+		verifyCanCreate(chainOfLetters);
 	}
 
 	~WordDecomposition() {
@@ -30,13 +44,49 @@ public:
 			if (countDiff < 0)
 				return false;
 		}
+		auto myRep = getWstring(*this);
+		auto otherRep = getWstring(wordDecomposition);
+		sort(myRep.begin(), myRep.end());
+		sort(otherRep.begin(), otherRep.end());
+		if (myRep.compare(otherRep) != 0) {
+			wcerr << "Wrong decomposition ERROR" << endl;
+		}
 		return true;
 	}
 private:
 	map<const int, int> decomposition;
+	static wstring getWstring(const WordDecomposition& wd) {
+		wstring recomposition;
+		for (auto const& letter : wd.decomposition) {
+			for (int i = 0; i < letter.second; i++) {
+				wstringstream ss;
+				wstring s;
+				char c = letter.first;
+				ss << c;
+				ss >> s;
+				recomposition.append(s);
+			}
+		}
+		return recomposition;
+	}
+	void verifyCanCreate(const wstring& chainOfLetters) {
+		//sum += letter.second;
+		wstring recomposition = WordDecomposition::getWstring(*this);
+		int sum = recomposition.length();
+		if (sum != chainOfLetters.length()) {
+			wcerr << "Wrong decomposition" << endl;
+		}
+		wstring sortedDecomposition = recomposition;
+		wstring sortedInput = chainOfLetters;
+		sort(sortedDecomposition.begin(), sortedDecomposition.end());
+		sort(sortedInput.begin(), sortedInput.end());
+		if (sortedInput.compare(sortedDecomposition) != 0) {
+			wcerr << "Wrong decomposition ERROR" << endl;
+		}
+	}
 };
 
-const bool USE_CHECKPOINTS = true;
+const bool USE_CHECKPOINTS = false;
 
 void writeSolution(int seedCounter, std::vector<int> * answer_array);
 void decomposeDictionary(std::vector<WordDecomposition *> &wordsFromDictionary);
@@ -57,7 +107,7 @@ int main(int argc, char* argv[]) {
 	auto start = chrono::high_resolution_clock::now();
 
 	// Vector containing data from input
-	auto inputFile = argv[1];
+	char* inputFile = "worst.txt";//argv[1];
 	
 	// Build word decomposition for input file
 	//
@@ -115,7 +165,7 @@ inline void printMetrics(std::chrono::time_point<std::chrono::steady_clock> &sta
 inline void findWordDecompositions(std::vector<WordDecomposition *> &seeds, std::vector<WordDecomposition *> &wordsFromDictionary, std::vector<int> * answer_array)
 {
 	if (USE_CHECKPOINTS) wcout << "Starting decomposing array" << endl;
-	#pragma omp parallel for 
+	#pragma omp parallel for
 	for (int seedIndex = 0; seedIndex < seeds.size(); seedIndex++) {
 		for (size_t l = 0; l < wordsFromDictionary.size(); l++) {
 			if (seeds[seedIndex]->canCreateWord(*wordsFromDictionary[l]))
