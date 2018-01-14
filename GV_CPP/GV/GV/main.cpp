@@ -7,6 +7,7 @@
 #include <map>
 #include <vector>
 #include <chrono>
+#include <cstdio>
 #define DEBUG 0
 using namespace std;
 class Decomposition {
@@ -61,7 +62,6 @@ int main(int argc, char* argv[]) {
 	// Worst case
 	seeds.reserve(5000);
 
-	
 	wstring line;
 	int seedCounter = 0;
 	while (getline(inputReader,line)) {
@@ -69,6 +69,7 @@ int main(int argc, char* argv[]) {
 		seeds.push_back(d);
 		++seedCounter;
 	}
+
 	inputReader.close();
 	wcout << " DONE" << endl;
 	// Read the big dictionnary
@@ -113,29 +114,28 @@ int main(int argc, char* argv[]) {
 	
 	wcout << endl << "End decomposing array" << endl;
 
-	ofstream solWriter("out.txt", ofstream::out);
+	FILE* outFile = fopen("out.txt", "w");
 	wcout << "Starting to write to disk ";
-	stringstream ss(stringstream::out);
 	for (size_t k = 0; k < seedCounter; k++)
 	{
-		for each (int p in answer_array[k])
-		{
+		stringstream ss(stringstream::out);
+		for (int i = 0; i < answer_array[k].size(); i++) {
+			int p = answer_array[k][i];
 #if DEBUG
 			wcout << p << " ";
 #endif
-			solWriter << p << " ";
+			fprintf(outFile, "%d ", p);
 		}
 #if DEBUG
 		wcout << endl;
 #endif
-		solWriter << endl;
-
-		/*string line = ss.str();
-		solWriter.write(line.c_str(), line.length());*/
+		fprintf(outFile, "\n");
 	}
-
-	solWriter.close();
+	fclose(outFile);
 	wcout << " DONE" << endl;
+
+	// Free objects
+
 	for (size_t i = 0; i < seedCounter; i++)
 	{
 		answer_array[i].clear();
