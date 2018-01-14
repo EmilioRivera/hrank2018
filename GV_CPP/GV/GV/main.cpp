@@ -6,7 +6,8 @@
 #include <deque>
 #include <map>
 #include <vector>
-
+#include <chrono>
+#define DEBUG 0
 using namespace std;
 class Decomposition {
 public:
@@ -22,7 +23,7 @@ public:
 	{
 		decomp.clear();
 	}
-	inline bool canCreateWord(Decomposition& wordDecomposition) {
+	inline bool canCreateWord(const Decomposition& wordDecomposition) {
 		for (auto const& letter : wordDecomposition.decomp) {
 			int countDiff = decomp[letter.first] - letter.second;
 			if (countDiff < 0)
@@ -30,17 +31,31 @@ public:
 		}
 		return true;
 	}
-	inline bool canCreateWord(const wstring& word) {
+	/*inline bool canCreateWord(const wstring& word) {
 		Decomposition wordDecomposition(word);
 		return canCreateWord(wordDecomposition);
-	}
+	}*/
 private:
 
 };
 
-int main() {
-
-	wifstream inputReader("test.txt", ifstream::in);
+int main(int argc, char* argv[]) {
+#if !DEBUG
+	if (argc != 2) {
+		wcerr << "Provide ONE argument: " << "<path_to_file>" << endl;
+		return 1;
+	}
+#endif
+	auto start = chrono::high_resolution_clock::now();
+	wcout << "Starting input decomposition...";
+	auto inputFile =
+#if DEBUG
+		"in_example.txt"
+#else
+		argv[1]
+#endif
+		;
+	wifstream inputReader(inputFile, ifstream::in);
 	inputReader.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
 	vector<Decomposition*> seeds;
 	// Worst case
@@ -55,43 +70,51 @@ int main() {
 		++seedCounter;
 	}
 	inputReader.close();
-
+	wcout << " DONE" << endl;
 	// Read the big dictionnary
 	wifstream dictionnaryReader("liste_des_mots.txt", ifstream::in);
 	dictionnaryReader.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
 
-
+	wcout << "Allocating answer array";
 	vector<int>* answer_array;
 	const int MAX_INPUT_SIZE = 5000;
 	answer_array = new vector<int>[seedCounter];
 	for (size_t j = 0; j < seedCounter; j++)
 	{
 		// Big enough to have everything lined up
-		answer_array->reserve(2000);
+		answer_array->reserve(75000);
 	}
+	wcout << " DONE" << endl;
 
+	// Reserve a 130,000 line array to contain words
+	vector<Decomposition*> wordsFromDictionary;
+	wordsFromDictionary.reserve(130000);
+
+	wcout << "Starting read dictionnary";
 	int lineIndex = 1;
 	while (getline(dictionnaryReader, line)) {
-		Decomposition lineDecomposition(line);
+		Decomposition* lineDecomposition = new Decomposition(line);
+		wordsFromDictionary.push_back(lineDecomposition);
+	}
+	dictionnaryReader.close();
+	wcout << "DONE" << endl;
+
+	wcout << "Starting decomposing array" << endl;
+	for (size_t l = 0; l < wordsFromDictionary.size(); l++)
+	{
 		for (size_t seedIndex = 0; seedIndex < seeds.size(); seedIndex++)
 		{
-			if (seeds[seedIndex]->canCreateWord(lineDecomposition))
+			if (seeds[seedIndex]->canCreateWord(*wordsFromDictionary[l]))
 				answer_array[seedIndex].push_back(lineIndex);
 		}
 		++lineIndex;
+		wcout << lineIndex << "\r";
 	}
-	dictionnaryReader.close();
+	wcout << endl << "End decomposing array" << endl;
 
-	/*Decomposition a(L"matrice");
-	Decomposition b(L"rice");
-	if (b.canCreateWord(L"matrice"))
-		wcout << "WRONG b can create a" << endl;
-
-	if (a.canCreateWord(L"rice"))
-		wcout << "GOOD a can create b" << endl;*/
-
+	wcout << "Starting to write to disk ";
 	wofstream solWriter("out.txt", wofstream::out);
-
+	stringstream ss(stringstream::out);
 	for (size_t k = 0; k < seedCounter; k++)
 	{
 		for each (int p in answer_array[k])
@@ -99,15 +122,16 @@ int main() {
 #if DEBUG
 			wcout << p << " ";
 #endif
-			solWriter << p << " ";
+			ss << p << " ";
 		}
 #if DEBUG
 		wcout << endl;
 #endif
-		solWriter << endl;
+		ss << endl;
+		ss.flush();
 	}
 	solWriter.close();
-
+	wcout << " DONE" << endl;
 	for (size_t i = 0; i < seedCounter; i++)
 	{
 		answer_array[i].clear();
@@ -120,5 +144,8 @@ int main() {
 #if DEBUG
 	system("pause");
 #endif
+	auto finish = chrono::high_resolution_clock::now();
+	chrono::duration<double> diff = finish - start;
+	wcout << diff.count() << endl;
 	return 0;
 }
