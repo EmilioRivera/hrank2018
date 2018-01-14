@@ -100,20 +100,21 @@ int main(int argc, char* argv[]) {
 	wcout << "DONE" << endl;
 
 	wcout << "Starting decomposing array" << endl;
-	for (size_t l = 0; l < wordsFromDictionary.size(); l++)
+	
+	for (size_t seedIndex = 0; seedIndex < seeds.size(); seedIndex++)
 	{
-		for (size_t seedIndex = 0; seedIndex < seeds.size(); seedIndex++)
+		for (size_t l = 0; l < wordsFromDictionary.size(); l++)
 		{
 			if (seeds[seedIndex]->canCreateWord(*wordsFromDictionary[l]))
-				answer_array[seedIndex].push_back(lineIndex);
+				answer_array[seedIndex].push_back(l+1);
 		}
-		++lineIndex;
-		wcout << lineIndex << "\r";
+		wcout << seedIndex << "\r";
 	}
+	
 	wcout << endl << "End decomposing array" << endl;
 
+	ofstream solWriter("out.txt", ofstream::out);
 	wcout << "Starting to write to disk ";
-	wofstream solWriter("out.txt", wofstream::out);
 	stringstream ss(stringstream::out);
 	for (size_t k = 0; k < seedCounter; k++)
 	{
@@ -122,14 +123,17 @@ int main(int argc, char* argv[]) {
 #if DEBUG
 			wcout << p << " ";
 #endif
-			ss << p << " ";
+			solWriter << p << " ";
 		}
 #if DEBUG
 		wcout << endl;
 #endif
-		ss << endl;
-		ss.flush();
+		solWriter << endl;
+
+		/*string line = ss.str();
+		solWriter.write(line.c_str(), line.length());*/
 	}
+
 	solWriter.close();
 	wcout << " DONE" << endl;
 	for (size_t i = 0; i < seedCounter; i++)
