@@ -100,8 +100,8 @@ int main(int argc, char* argv[]) {
 	wcout << "DONE" << endl;
 
 	wcout << "Starting decomposing array" << endl;
-	
-	for (size_t seedIndex = 0; seedIndex < seeds.size(); seedIndex++)
+	#pragma omp parallel for 
+	for (int seedIndex = 0; seedIndex < seeds.size(); seedIndex++)
 	{
 		for (size_t l = 0; l < wordsFromDictionary.size(); l++)
 		{
