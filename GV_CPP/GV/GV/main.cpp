@@ -8,7 +8,6 @@
 #include <vector>
 #include <chrono>
 #include <cstdio>
-#include "main.h"
 #define DEBUG 0
 
 using namespace std;
@@ -39,6 +38,7 @@ private:
 
 const bool USE_CHECKPOINTS = true;
 
+void writeSolution(int seedCounter, std::vector<int> * answer_array);
 void decomposeDictionary(std::vector<WordDecomposition *> &wordsFromDictionary);
 void decomposeInput(char * inputFile, std::vector<WordDecomposition *> &seeds, int &seedCounter);
 void findWordDecompositions(std::vector<WordDecomposition *> &seeds, std::vector<WordDecomposition *> &wordsFromDictionary, std::vector<int> * answer_array);
